@@ -133,7 +133,7 @@ void setup(){
   while ( status != WL_CONNECTED) {
     Serial.print("Attempting to connect to WEP network, SSID: ");
     Serial.println(ssid);
-    status = WiFi.begin("ssid", "keyIndex", "pass");
+    status = WiFi.begin("ssid", "pass");
 
     // wait 10 seconds for connection:
     delay(10000);
