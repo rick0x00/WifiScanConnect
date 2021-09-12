@@ -12,8 +12,8 @@
 
 
 //**StartDefineVariables*********************************************************
-//led status WiFi
-#define led 2 
+//LedStatus status WiFi
+#define LedStatus 2 
 //**EndDefineVariables***********************************************************
 
 
@@ -23,7 +23,7 @@
 String msgtxt; //creating variable to traffic text messages;
 
 //--WifiVariables----------------------------------------------------------------
-// const int led = 2; //led status WIFI
+// const int LedStatus = 2; //LedStatus status WIFI
 //--WifiScanVariables------------------------------------------------------------
 
 //--WifiServerVariables----------------------------------------------------------
@@ -34,15 +34,59 @@ WebServer server(80);
 
 //==StartFuncions================================================================
 //__Msgprintfuncion______________________________________________________________
-void msg(String txt){
-  //função criada para ser responsável por qualquer tipo de mensagem;
+void msg(String txt, int ln, int USBSerial, int BLESerial, int WIFISerial, int I2C16x2LCD){
+  //function created to be responsible for any type of message;
   msgtxt = txt;
-  Serial.println(msgtxt);
+  //it is necessary to inform the text
+
+  // PRINT USB SERIAL
+  if (USBSerial == 0){
+  }
+  if (USBSerial == 1){
+    if (ln == 0){
+      Serial.print(msgtxt);
+    }
+    if (ln == 1){
+      Serial.println(msgtxt);
+    }
+  }
+  // PRINT BLE SERIAL
+  if (BLESerial == 0){
+  }
+  if (BLESerial == 1){
+    if (ln == 0){
+      Serial.print(msgtxt);
+    }
+    if (ln == 1){
+      Serial.println(msgtxt);
+    }
+  }
+  // PRINT WIFI SERIAL
+  if (WIFISerial == 0){
+  }
+  if (WIFISerial == 1){
+    if (ln == 0){
+      Serial.print(msgtxt);
+    }
+    if (ln == 1){
+      Serial.println(msgtxt);
+    }
+  }
+  // PRINT I2C 16x2 LCD
+  if (I2C16x2LCD == 0){
+  }
+  if (I2C16x2LCD == 1){
+    if (ln == 0){
+      Serial.print(msgtxt);
+    }
+    if (ln == 1){
+      Serial.println(msgtxt);
+    }
+  }
 }
 
 //__WifiScanFunctions____________________________________________________________
 void WifiScanSetup(){
-  Serial.begin(115200);
   // Set WiFi to station mode and disconnect from an AP if it was previously connected
   WiFi.mode(WIFI_STA);
   WiFi.disconnect();
@@ -79,13 +123,13 @@ void WifiScanLoop(){
 
 //__WebServerFunctions___________________________________________________________
 void handleRoot(){
-  digitalWrite(led, 1);
+  digitalWrite(LedStatus, 1);
   server.send(200, "text/plain", "hello from esp32!");
-  digitalWrite(led, 0);
+  digitalWrite(LedStatus, 0);
 }
 
 void handleNotFound(){
-  digitalWrite(led, 1);
+  digitalWrite(LedStatus, 1);
   String message = "File Not Found\n\n";
   message += "URI: ";
   message += server.uri();
@@ -98,13 +142,10 @@ void handleNotFound(){
     message += " " + server.argName(i) + ": " + server.arg(i) + "\n";
   }
   server.send(404, "text/plain", message);
-  digitalWrite(led, 0);
+  digitalWrite(LedStatus, 0);
 }
 
 void WifiServerSetup(){
-  pinMode(led, OUTPUT);
-  digitalWrite(led, 0);
-  Serial.begin(115200);
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
   Serial.println("");
@@ -126,8 +167,7 @@ void WifiServerSetup(){
 
   server.on("/", handleRoot);
 
-  server.on("/inline", []()
-            { server.send(200, "text/plain", "this works as well"); });
+  server.on("/inline", [](){ server.send(200, "text/plain", "this works as well"); });
 
   server.onNotFound(handleNotFound);
 
@@ -141,9 +181,13 @@ void WifiServerLoop(){
 //==EndFuncions==================================================================
 
 void setup(){
+  pinMode(LedStatus, OUTPUT);
+  digitalWrite(LedStatus, 0);
+  Serial.begin(115200);
   WifiServerSetup();
 }
 
 void loop(){
   WifiServerLoop();
+
 }
