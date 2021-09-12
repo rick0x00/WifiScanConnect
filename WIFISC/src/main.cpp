@@ -10,9 +10,20 @@
 #include <ESPmDNS.h>
 //##EndIncludes##################################################################
 
+
+//**StartDefineVariables*********************************************************
+//led status WiFi
+#define led 2 
+//**EndDefineVariables***********************************************************
+
+
 //++StartVariables+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+//--MsgPrintFunctionvariable-----------------------------------------------------
+String msgtxt; //creating variable to traffic text messages;
+
 //--WifiVariables----------------------------------------------------------------
-const int led = 13; //led status WIFI
+// const int led = 2; //led status WIFI
 //--WifiScanVariables------------------------------------------------------------
 
 //--WifiServerVariables----------------------------------------------------------
@@ -22,6 +33,13 @@ WebServer server(80);
 //++EndVariables+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 //==StartFuncions================================================================
+//__Msgprintfuncion______________________________________________________________
+void msg(String txt){
+  //função criada para ser responsável por qualquer tipo de mensagem;
+  msgtxt = txt;
+  Serial.println(msgtxt);
+}
+
 //__WifiScanFunctions____________________________________________________________
 void WifiScanSetup(){
   Serial.begin(115200);
@@ -123,9 +141,9 @@ void WifiServerLoop(){
 //==EndFuncions==================================================================
 
 void setup(){
-  WifiScanSetup();
+  WifiServerSetup();
 }
 
 void loop(){
-  WifiScanLoop();
+  WifiServerLoop();
 }
