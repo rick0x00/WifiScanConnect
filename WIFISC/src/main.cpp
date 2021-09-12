@@ -12,48 +12,37 @@
 
 //++StartVariables+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //--WifiVariables----------------------------------------------------------------
-
+const int led = 13; //led status WIFI
 //--WifiScanVariables------------------------------------------------------------
 
 //--WifiServerVariables----------------------------------------------------------
-const char *ssid = "........";
-const char *password = "........";
-
+const char *ssid = "henrique";
+const char *password = "grampovoador";
 WebServer server(80);
-
-const int led = 13;
 //++EndVariables+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 //==StartFuncions================================================================
 //__WifiScanFunctions____________________________________________________________
-void WifiScanSetup()
-{
+void WifiScanSetup(){
   Serial.begin(115200);
-
   // Set WiFi to station mode and disconnect from an AP if it was previously connected
   WiFi.mode(WIFI_STA);
   WiFi.disconnect();
   delay(100);
-
-  Serial.println("Setup done");
+  Serial.println("WifiScanSetup Setup done.");
 }
-void WifiScanLoop()
-{
+void WifiScanLoop(){
   Serial.println("scan start");
-
   // WiFi.scanNetworks will return the number of networks found
   int n = WiFi.scanNetworks();
   Serial.println("scan done");
-  if (n == 0)
-  {
+  if (n == 0){
     Serial.println("no networks found");
   }
-  else
-  {
+  else{
     Serial.print(n);
     Serial.println(" networks found");
-    for (int i = 0; i < n; ++i)
-    {
+    for (int i = 0; i < n; ++i){
       // Print SSID and RSSI for each network found
       Serial.print(i + 1);
       Serial.print(": ");
@@ -66,21 +55,18 @@ void WifiScanLoop()
     }
   }
   Serial.println("");
-
   // Wait a bit before scanning again
   delay(5000);
 }
 
 //__WebServerFunctions___________________________________________________________
-void handleRoot()
-{
+void handleRoot(){
   digitalWrite(led, 1);
   server.send(200, "text/plain", "hello from esp32!");
   digitalWrite(led, 0);
 }
 
-void handleNotFound()
-{
+void handleNotFound(){
   digitalWrite(led, 1);
   String message = "File Not Found\n\n";
   message += "URI: ";
@@ -90,16 +76,14 @@ void handleNotFound()
   message += "\nArguments: ";
   message += server.args();
   message += "\n";
-  for (uint8_t i = 0; i < server.args(); i++)
-  {
+  for (uint8_t i = 0; i < server.args(); i++){
     message += " " + server.argName(i) + ": " + server.arg(i) + "\n";
   }
   server.send(404, "text/plain", message);
   digitalWrite(led, 0);
 }
 
-void WifiServerSetup()
-{
+void WifiServerSetup(){
   pinMode(led, OUTPUT);
   digitalWrite(led, 0);
   Serial.begin(115200);
@@ -108,8 +92,7 @@ void WifiServerSetup()
   Serial.println("");
 
   // Wait for connection
-  while (WiFi.status() != WL_CONNECTED)
-  {
+  while (WiFi.status() != WL_CONNECTED){
     delay(500);
     Serial.print(".");
   }
@@ -119,8 +102,7 @@ void WifiServerSetup()
   Serial.print("IP address: ");
   Serial.println(WiFi.localIP());
 
-  if (MDNS.begin("esp32"))
-  {
+  if (MDNS.begin("esp32")){
     Serial.println("MDNS responder started");
   }
 
@@ -134,18 +116,16 @@ void WifiServerSetup()
   server.begin();
   Serial.println("HTTP server started");
 }
-void WifiServerLoop()
-{
+void WifiServerLoop(){
   server.handleClient();
   delay(2); //allow the cpu to switch to other tasks
 }
-
 //==EndFuncions==================================================================
 
-void setup()
-{
+void setup(){
+  WifiScanSetup();
 }
 
-void loop()
-{
+void loop(){
+  WifiScanLoop();
 }
