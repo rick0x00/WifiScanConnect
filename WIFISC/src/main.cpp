@@ -1,63 +1,86 @@
 #include <Arduino.h>
+//##StartIncludes################################################################
+//--WifiIncludes------------------------------------------------------------------
 #include <WiFi.h>
+//--WifiScanIncludes-------------------------------------------------------------
+
+//--WifiServerIncludes-----------------------------------------------------------
 #include <WiFiClient.h>
 #include <WebServer.h>
 #include <ESPmDNS.h>
+//##EndIncludes##################################################################
 
-//-------------------------------------------------------------------------------
+//++StartVariables+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+//--WifiVariables----------------------------------------------------------------
 
-//--webserver
-const char* ssid = "";                     // your network SSID (name)
-const char* pass = "";       // your network key
-int keyIndex = 0;                                // your network key Index number
-int status = WL_IDLE_STATUS;                     // the Wifi radio's status
+//--WifiScanVariables------------------------------------------------------------
+
+//--WifiServerVariables----------------------------------------------------------
+const char *ssid = "........";
+const char *password = "........";
+
 WebServer server(80);
+
 const int led = 13;
+//++EndVariables+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-//--WifiScan---------------------------------------------------------------------
-void WifiScanSetup(){
-    // Set WiFi to station mode and disconnect from an AP if it was previously connected
-    WiFi.mode(WIFI_STA);
-    WiFi.disconnect();
-    delay(100);
+//==StartFuncions================================================================
+//__WifiScanFunctions____________________________________________________________
+void WifiScanSetup()
+{
+  Serial.begin(115200);
+
+  // Set WiFi to station mode and disconnect from an AP if it was previously connected
+  WiFi.mode(WIFI_STA);
+  WiFi.disconnect();
+  delay(100);
+
+  Serial.println("Setup done");
 }
-void WifiScanLoop(){
-    Serial.println("scan start");
-    // WiFi.scanNetworks will return the number of networks found
-    int n = WiFi.scanNetworks();
-    Serial.println("scan done");
-    if (n == 0) {
-        Serial.println("no networks found");
-    } else {
-        Serial.print(n);
-        Serial.println(" networks found");
-        for (int i = 0; i < n; ++i) {
-            // Print SSID and RSSI for each network found
-            Serial.print(i + 1);
-            Serial.print(": ");
-            Serial.print(WiFi.SSID(i));
-            Serial.print(" (");
-            Serial.print(WiFi.RSSI(i));
-            Serial.print(")");
-            Serial.println((WiFi.encryptionType(i) == WIFI_AUTH_OPEN)?" ":"*");
-            delay(10);
-        }
+void WifiScanLoop()
+{
+  Serial.println("scan start");
+
+  // WiFi.scanNetworks will return the number of networks found
+  int n = WiFi.scanNetworks();
+  Serial.println("scan done");
+  if (n == 0)
+  {
+    Serial.println("no networks found");
+  }
+  else
+  {
+    Serial.print(n);
+    Serial.println(" networks found");
+    for (int i = 0; i < n; ++i)
+    {
+      // Print SSID and RSSI for each network found
+      Serial.print(i + 1);
+      Serial.print(": ");
+      Serial.print(WiFi.SSID(i));
+      Serial.print(" (");
+      Serial.print(WiFi.RSSI(i));
+      Serial.print(")");
+      Serial.println((WiFi.encryptionType(i) == WIFI_AUTH_OPEN) ? " " : "*");
+      delay(10);
     }
-    Serial.println("");
+  }
+  Serial.println("");
 
-    // Wait a bit before scanning again
-    delay(5000);
+  // Wait a bit before scanning again
+  delay(5000);
 }
-//-------------------------------------------------------------------------------
 
-
-//--WebServer--------------------------------------------------------------------
-void handleRoot() {
+//__WebServerFunctions___________________________________________________________
+void handleRoot()
+{
   digitalWrite(led, 1);
   server.send(200, "text/plain", "hello from esp32!");
   digitalWrite(led, 0);
 }
-void handleNotFound() {
+
+void handleNotFound()
+{
   digitalWrite(led, 1);
   String message = "File Not Found\n\n";
   message += "URI: ";
@@ -67,22 +90,26 @@ void handleNotFound() {
   message += "\nArguments: ";
   message += server.args();
   message += "\n";
-  for (uint8_t i = 0; i < server.args(); i++) {
+  for (uint8_t i = 0; i < server.args(); i++)
+  {
     message += " " + server.argName(i) + ": " + server.arg(i) + "\n";
   }
   server.send(404, "text/plain", message);
   digitalWrite(led, 0);
 }
-void WifiServerSetup(){
+
+void WifiServerSetup()
+{
   pinMode(led, OUTPUT);
   digitalWrite(led, 0);
   Serial.begin(115200);
   WiFi.mode(WIFI_STA);
-  WiFi.begin(ssid, pass);
+  WiFi.begin(ssid, password);
   Serial.println("");
 
   // Wait for connection
-  while (WiFi.status() != WL_CONNECTED) {
+  while (WiFi.status() != WL_CONNECTED)
+  {
     delay(500);
     Serial.print(".");
   }
@@ -92,55 +119,33 @@ void WifiServerSetup(){
   Serial.print("IP address: ");
   Serial.println(WiFi.localIP());
 
-  if (MDNS.begin("esp32")) {
+  if (MDNS.begin("esp32"))
+  {
     Serial.println("MDNS responder started");
   }
 
   server.on("/", handleRoot);
 
-  server.on("/inline", []() {
-    server.send(200, "text/plain", "this works as well");
-  });
+  server.on("/inline", []()
+            { server.send(200, "text/plain", "this works as well"); });
 
   server.onNotFound(handleNotFound);
 
   server.begin();
   Serial.println("HTTP server started");
 }
-//-------------------------------------------------------------------------------
-void setup(){
-    Serial.begin(115200);
-
-      while (!Serial) {
-    ; // wait for serial port to connect. Needed for Leonardo only
-  }
-
-  // check for the presence of the shield:
-  if (WiFi.status() == WL_NO_SHIELD) {
-    Serial.println("WiFi shield not present");
-    // don't continue:
-    while (true);
-  }
-
-  // attempt to connect to Wifi network:
-  while ( status != WL_CONNECTED) {
-    Serial.print("Attempting to connect to WEP network, SSID: ");
-    Serial.println(ssid);
-    status = WiFi.begin("ssid", "pass");
-
-    // wait 10 seconds for connection:
-    delay(10000);
-  }
-
-  // once you are connected :
-  Serial.print("You're connected to the network");
-    
-    WifiScanSetup();
-    WifiServerSetup();
-    Serial.println("Setup done");
-    
+void WifiServerLoop()
+{
+  server.handleClient();
+  delay(2); //allow the cpu to switch to other tasks
 }
 
-void loop(){
-  Serial.println(WiFi.status());
+//==EndFuncions==================================================================
+
+void setup()
+{
+}
+
+void loop()
+{
 }
