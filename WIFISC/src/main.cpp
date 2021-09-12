@@ -241,10 +241,7 @@ void handleRoot() {
   int min = sec / 60;
   int hr = min / 60;
 
-  snprintf(temp, 400, html,
-
-           hr, min % 60, sec % 60
-          );
+  snprintf(temp, 400, html, hr, min % 60, sec % 60 );
   server.send(200, "text/html", temp);
   digitalWrite(LedStatus, 0);
 }
