@@ -306,19 +306,51 @@ void BluetoothSetup(){
   Serial.println("The device started, now you can pair it with bluetooth!");
 }
 void BluetoothLoop(){
-  if (Serial.available()) {
+  if (Serial.available() || SerialBT.available()) {
     digitalWrite(LedStatus, 1);
-    delay(5);
+    String DataSerial;
+    if (Serial.available()){
+      DataSerial = Serial.readString();
+    }
+    if (SerialBT.available()){
+      DataSerial = SerialBT.readString();
+    }
+    SerialBT.print(DataSerial);
+    Serial.print(DataSerial);
     digitalWrite(LedStatus, 0);
-    SerialBT.write(Serial.read());
+    if (DataSerial == "WS"){
+      WifiScanSetup();
+      int WifiScanDone=0;
+      while (WifiScanDone == 0){
+        WifiScanLoop();
+        int n = WiFi.scanNetworks();
+        char WifiNumber;
+        delay(500);
+        if (Serial.available() || SerialBT.available()) {
+          if (Serial.available()){
+            DataSerial = Serial.readString();
+          }
+          if (SerialBT.available()){
+            DataSerial = SerialBT.readString();
+          }
+          SerialBT.print(DataSerial);
+          Serial.print(DataSerial);
+          digitalWrite(LedStatus, 0);
+          for (int i = 0; i < n; ++i){
+            if (DataSerial == "i"){
+              WifiNumber = i;
+            }
+          }
+          if ("WifiNumber" > "n"){
+            SerialBT.print("ERROR");
+            Serial.print("ERROR");
+          }else{
+            ssid = "WiFi.SSID(WifiNumber)";
+          }
+        }
+      }
+    }
   }
-  if (SerialBT.available()) {
-    digitalWrite(LedStatus, 1);
-    delay(5);
-    digitalWrite(LedStatus, 0);
-    Serial.write(SerialBT.read());
-  }
-  delay(20);
 }
 //==EndFuncions==================================================================
 
