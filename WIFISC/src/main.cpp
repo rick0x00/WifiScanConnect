@@ -27,6 +27,7 @@
 //**StartDefineVariables*********************************************************
 //LedStatus status WiFi
 #define LedStatus 2 
+char WifiNumber; // wifi number discovered
 //**EndDefineVariables***********************************************************
 
 
@@ -324,7 +325,7 @@ void BluetoothLoop(){
       while (WifiScanDone == 0){
         WifiScanLoop();
         int n = WiFi.scanNetworks();
-        char WifiNumber;
+        
         delay(500);
         if (Serial.available() || SerialBT.available()) {
           if (Serial.available()){
