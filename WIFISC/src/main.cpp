@@ -19,6 +19,8 @@
 #include <WiFiClient.h>
 #include <WebServer.h>
 #include <ESPmDNS.h>
+//--BluetoothSerialIncludes--------------------------------------------------------------
+#include <BluetoothSerial.h>
 //##EndIncludes##################################################################
 
 
@@ -47,6 +49,8 @@ const char* www_password = "esp32";
 const char* www_realm = "Custom Auth Realm";
 // the Content of the HTML response in case of Unautherized Access Default:empty
 String authFailResponse = "Authentication Failed";
+//--BluetoothVariables----------------------------------------------------
+BluetoothSerial SerialBT;
 //++EndVariables+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 //==StartFuncions================================================================
@@ -230,7 +234,7 @@ void HttpAdvancedAuthLoop(){
   server.handleClient();
   delay(2);//allow the cpu to switch to other tasks
 }
-//__AdvancedWebServerFunctions____________________________________________________
+//__AdvancedWebServerFunctions___________________________________________________
 const char *html = 
 #include "webpage.h"
 ;
@@ -296,15 +300,40 @@ void AdvancedWebServerLoop(){
   server.handleClient();
   delay(1000);//allow the cpu to switch to other tasks
 }
+//__BluetoothFunctions___________________________________________________________
+void BluetoothSetup(){
+  SerialBT.begin("ESP32test"); //Bluetooth device name
+  Serial.println("The device started, now you can pair it with bluetooth!");
+}
+void BluetoothLoop(){
+  if (Serial.available()) {
+    digitalWrite(LedStatus, 1);
+    delay(5);
+    digitalWrite(LedStatus, 0);
+    SerialBT.write(Serial.read());
+  }
+  if (SerialBT.available()) {
+    digitalWrite(LedStatus, 1);
+    delay(5);
+    digitalWrite(LedStatus, 0);
+    Serial.write(SerialBT.read());
+  }
+  delay(20);
+}
 //==EndFuncions==================================================================
 
 void setup(){
   pinMode(LedStatus, OUTPUT);
   digitalWrite(LedStatus, 0);
   Serial.begin(115200);
-  AdvancedWebServerSetup();
+
+  BluetoothSetup();
+
+  digitalWrite(LedStatus, 1);
+  delay(500);
+  digitalWrite(LedStatus, 0);
 }
 
 void loop(){
-  AdvancedWebServerLoop();
+  BluetoothLoop();
 }
